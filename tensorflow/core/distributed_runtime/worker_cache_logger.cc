@@ -1,4 +1,4 @@
-/* Copyright 2016 Google Inc. All Rights Reserved.
+/* Copyright 2016 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ void WorkerCacheLogger::SetLogging(bool v) {
     ++want_logging_count_;
   } else {
     --want_logging_count_;
-    // If RPCs get cancelled, it may be possible for the count
+    // If RPCs get canceled, it may be possible for the count
     // to go negative.  This should not be a fatal error, since
     // logging is non-critical.
     if (want_logging_count_ < 0) want_logging_count_ = 0;

@@ -1,4 +1,4 @@
-/* Copyright 2015 Google Inc. All Rights Reserved.
+/* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -81,8 +81,10 @@ class Tracing {
     ~ScopedActivity();
 
    private:
+#if defined(PLATFORM_GOOGLE)
     const bool enabled_;
     const int32 region_id_;
+#endif
 
     TF_DISALLOW_COPY_AND_ASSIGN(ScopedActivity);
   };
@@ -195,6 +197,12 @@ class Tracing::ScopedAnnotation {
   // label string is only done if tracing is enabled.
   ScopedAnnotation(StringPiece name_part1, StringPiece name_part2);
 
+  // Returns true iff scoped annotations are active.
+  static bool Enabled() {
+    auto e = Tracing::engine();
+    return e && e->IsEnabled();
+  }
+
  private:
   std::unique_ptr<Engine::Annotation> annotation_;
 };
@@ -206,6 +214,12 @@ class Tracing::ScopedAnnotation {
 class Tracing::TraceMe {
  public:
   explicit TraceMe(StringPiece name);
+
+  // If tracing is enabled, set up a traceMe with a label of
+  // "<name_part1>:<name_part2>".  This can be cheaper than the
+  // single-argument constructor because the concatenation of the
+  // label string is only done if tracing is enabled.
+  TraceMe(StringPiece name_part1, StringPiece name_part2);
 
  private:
   std::unique_ptr<Engine::Tracer> tracer_;
@@ -231,6 +245,15 @@ inline Tracing::TraceMe::TraceMe(StringPiece name) {
   auto e = Tracing::engine();
   if (e && e->IsEnabled()) {
     tracer_.reset(e->StartTracing(name));
+  }
+}
+
+inline Tracing::TraceMe::TraceMe(StringPiece name_part1,
+                                 StringPiece name_part2) {
+  auto e = Tracing::engine();
+  if (e && e->IsEnabled()) {
+    tracer_.reset(
+        e->StartTracing(strings::StrCat(name_part1, ":", name_part2)));
   }
 }
 

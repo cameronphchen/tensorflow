@@ -6,12 +6,10 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
-exports_files(["LICENSE"])
-
 load("//tensorflow:tensorflow.bzl", "tf_cc_tests")
 
 filegroup(
-    name = "android_srcs",
+    name = "mobile_srcs",
     srcs = [
         "ctc_beam_entry.h",
         "ctc_beam_scorer.h",
@@ -19,6 +17,11 @@ filegroup(
         "ctc_decoder.h",
         "ctc_loss_util.h",
     ],
+)
+
+alias(
+    name = "android_srcs",
+    actual = ":mobile_srcs",
 )
 
 filegroup(
@@ -65,7 +68,9 @@ cc_library(
 )
 
 tf_cc_tests(
-    tests = [
+    name = "ctc_beam_search_test",
+    size = "small",
+    srcs = [
         "ctc_beam_search_test.cc",
     ],
     deps = [
@@ -86,6 +91,7 @@ cc_library(
     ],
     deps = [
         ":ctc_loss_util_lib",
+        "//tensorflow/core:framework",
         "//tensorflow/core:lib",
         "//third_party/eigen3",
     ],
